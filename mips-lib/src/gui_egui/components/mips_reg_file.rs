@@ -49,7 +49,7 @@ impl EguiComponent for RegFile {
             ui.separator();
 
             // A scroll area with all the registers in one label
-            ScrollArea::vertical().show(ui, |ui| {
+            ScrollArea::both().show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.set_height(ui.available_height());
 
