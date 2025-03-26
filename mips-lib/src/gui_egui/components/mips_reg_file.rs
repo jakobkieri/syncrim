@@ -24,7 +24,9 @@ impl EguiComponent for RegFile {
         clip_rect: Rect,
         _editor_mode: EditorMode,
     ) -> Option<Vec<Response>> {
-        basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
+        let mut mem_view_vis: bool = self.mem_view.borrow().visible;
+
+        let r = basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
             ui.set_width(120f32 * scale);
             ui.set_height(250f32 * scale);
             ui.label("Register File");
@@ -45,6 +47,17 @@ impl EguiComponent for RegFile {
                     ui.selectable_value(&mut tmp, RegFormat::UTF8LE, "UTF-8 little endian");
                 });
             *self.reg_format.borrow_mut() = tmp;
+
+            match mem_view_vis {
+                false => {
+                    if ui.button("Show regfile window").clicked() {
+                        mem_view_vis = true;
+                    }
+                }
+                true => {
+                    ui.toggle_value(&mut mem_view_vis, "Hide REGFILE window");
+                }
+            };
 
             ui.separator();
 
@@ -89,7 +102,8 @@ impl EguiComponent for RegFile {
                 // push the string as monospace to the ui
                 ui.label(RichText::new(str).size(12f32 * scale).monospace())
             });
-        })
+        });
+        r
     }
     fn render_editor(
         &mut self,
