@@ -1,5 +1,7 @@
+#[cfg(feature = "gui-egui")]
+use crate::gui_egui::mips_mem_view_window::MemViewWindow;
+
 // use std::fmt::Alignment;
-use crate::gui_egui::mips_reg_view_window::RegViewWindow;
 use log::*;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
@@ -27,6 +29,7 @@ pub struct RegFile {
     pub(crate) write_address_in: Input,
     pub(crate) write_data_in: Input,
     pub(crate) write_enable_in: Input,
+    pub mem_view: RefCell<MemViewWindow>,
 
     #[serde(skip)]
     pub registers: RefCell<[u32; 32]>, // all 32 registers, in future, we might save the whole signal
@@ -39,8 +42,6 @@ pub struct RegFile {
 
     #[serde(skip)]
     pub reg_format: RefCell<RegFormat>,
-
-    pub reg_view: RefCell<RegViewWindow>,
 }
 #[derive(Clone, Default, PartialEq, PartialOrd, Debug)]
 pub enum RegFormat {
@@ -176,7 +177,7 @@ impl Component for RegFile {
 
 impl RegFile {
     pub fn new(
-        id: &str,
+        id: String,
         pos: (f32, f32),
         rs_address_in: Input,
         rt_address_in: Input,
@@ -186,10 +187,8 @@ impl RegFile {
     ) -> Self {
         let mut arr: [u32; 32] = [0; 32];
         arr[29] = 0x8000_0000;
-
         #[cfg(feature = "gui-egui")]
-        let reg_view =
-            RegViewWindow::new(id.to_string(), "Register view".into()).set_data_view(None);
+        let mem_view = MemViewWindow::new(id.clone(), "REGFILE view".into()).set_data_view(None);
         RegFile {
             id: id.to_string(),
             pos,
@@ -202,12 +201,12 @@ impl RegFile {
             history: RefCell::new(vec![]),
             show_reg_names: RefCell::default(),
             reg_format: RefCell::default(),
-            reg_view: RefCell::new(reg_view),
+            mem_view: RefCell::new(mem_view),
         }
     }
 
     pub fn rc_new(
-        id: &str,
+        id: String,
         pos: (f32, f32),
         rs_address_in: Input,
         rt_address_in: Input,
