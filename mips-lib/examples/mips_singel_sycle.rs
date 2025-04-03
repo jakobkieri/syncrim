@@ -217,13 +217,14 @@ fn main() {
             //
             //
             RegFile::rc_new(
-                "reg_file",
+                "reg_file".to_string(),
                 (350.0, 225.0),
                 Input::new("instruction_split", INSTRUCTION_SPLITTER_RS_ID),
                 Input::new("instruction_split", INSTRUCTION_SPLITTER_RT_ID),
                 Input::new("reg_write_addr", REGISTER_OUT_ID), //write address
                 Input::new("result_reg", REGISTER_OUT_ID),     //write data
                 Input::new("reg_we", REGISTER_OUT_ID),
+                "phys_mem".into(),
             ),
         ],
     };
