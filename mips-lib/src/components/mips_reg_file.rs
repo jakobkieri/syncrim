@@ -30,6 +30,7 @@ pub struct RegFile {
     pub(crate) write_data_in: Input,
     pub(crate) write_enable_in: Input,
     pub mem_view: RefCell<MemViewWindow>,
+    pub phys_mem_id: String,
 
     #[serde(skip)]
     pub registers: RefCell<[u32; 32]>, // all 32 registers, in future, we might save the whole signal
@@ -71,10 +72,6 @@ impl Component for RegFile {
             self.id.clone(),
             Ports::new(
                 vec![
-                    &InputPort {
-                        port_id: reg_file_fields::RS_ADDRESS_IN_ID.to_string(),
-                        input: self.rs_address_in.clone(),
-                    },
                     &InputPort {
                         port_id: reg_file_fields::RT_ADDRESS_IN_ID.to_string(),
                         input: self.rt_address_in.clone(),
@@ -184,6 +181,7 @@ impl RegFile {
         write_address_in: Input,
         write_data_in: Input,
         write_enable_in: Input,
+        phys_mem_id: String,
     ) -> Self {
         let mut arr: [u32; 32] = [0; 32];
         arr[29] = 0x8000_0000;
@@ -202,6 +200,7 @@ impl RegFile {
             show_reg_names: RefCell::default(),
             reg_format: RefCell::default(),
             mem_view: RefCell::new(mem_view),
+            phys_mem_id,
         }
     }
 
@@ -213,6 +212,7 @@ impl RegFile {
         write_address_in: Input,
         write_data_in: Input,
         write_enable_in: Input,
+        phys_mem_id: String,
     ) -> Rc<Self> {
         Rc::new(RegFile::new(
             id,
@@ -222,6 +222,7 @@ impl RegFile {
             write_address_in,
             write_data_in,
             write_enable_in,
+            phys_mem_id,
         ))
     }
 
