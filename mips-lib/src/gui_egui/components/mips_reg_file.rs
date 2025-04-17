@@ -24,7 +24,7 @@ impl EguiComponent for RegFile {
         clip_rect: Rect,
         _editor_mode: EditorMode,
     ) -> Option<Vec<Response>> {
-        let mut mem_view_vis: bool = self.mem_view.borrow().visible;
+        let mut reg_view_vis: bool = self.reg_view.borrow().visible;
 
         let r = basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
             ui.set_width(120f32 * scale);
@@ -48,14 +48,14 @@ impl EguiComponent for RegFile {
                 });
             *self.reg_format.borrow_mut() = tmp;
 
-            match mem_view_vis {
+            match reg_view_vis {
                 false => {
                     if ui.button("Show regfile window").clicked() {
-                        mem_view_vis = true;
+                        reg_view_vis = true;
                     }
                 }
                 true => {
-                    ui.toggle_value(&mut mem_view_vis, "Hide REGFILE window");
+                    ui.toggle_value(&mut reg_view_vis, "Hide REGFILE window");
                 }
             };
 
@@ -117,9 +117,9 @@ impl EguiComponent for RegFile {
                 .expect("can't downcast to physical memory");
             // {} to drop RefMut as early as possible
             {
-                let mut mem_view = self.mem_view.borrow_mut();
-                mem_view.visible = mem_view_vis;
-                mem_view.render(ui.ctx(), &phys_mem.mem.borrow());
+                let mut reg_view = self.reg_view.borrow_mut();
+                reg_view.visible = reg_view_vis;
+                reg_view.render(ui.ctx());
             }
         }
         r
