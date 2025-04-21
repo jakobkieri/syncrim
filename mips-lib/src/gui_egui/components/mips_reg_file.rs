@@ -24,11 +24,30 @@ impl EguiComponent for RegFile {
         clip_rect: Rect,
         _editor_mode: EditorMode,
     ) -> Option<Vec<Response>> {
+        let mut reg_view_vis: bool = self.reg_view.borrow().visible;
+
         basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
             ui.set_width(120f32 * scale);
             ui.set_height(250f32 * scale);
             ui.label("Register File");
 
+            match reg_view_vis {
+                false => {
+                    if ui.button("Show register window").clicked() {
+                        reg_view_vis = true;
+                    }
+                }
+                true => {
+                    ui.toggle_value(&mut reg_view_vis, "Hide register window");
+                }
+            };
+            if let Some(sim) = &simulator {
+                let mut reg_view = self.reg_view.borrow_mut();
+                reg_view.visible = reg_view_vis;
+                reg_view.render(ui.ctx());
+            }
+
+            /*
             // A toggle button for showing register names
             ui.toggle_value(&mut self.show_reg_names.borrow_mut(), "Show names");
 
@@ -89,6 +108,7 @@ impl EguiComponent for RegFile {
                 // push the string as monospace to the ui
                 ui.label(RichText::new(str).size(12f32 * scale).monospace())
             });
+            */
         })
     }
     fn render_editor(

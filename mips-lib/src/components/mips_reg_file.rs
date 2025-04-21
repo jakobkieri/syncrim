@@ -1,4 +1,5 @@
 // use std::fmt::Alignment;
+use crate::gui_egui::mips_reg_view_window::RegViewWindow;
 use log::*;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
@@ -38,6 +39,8 @@ pub struct RegFile {
 
     #[serde(skip)]
     pub reg_format: RefCell<RegFormat>,
+
+    pub reg_view: RefCell<RegViewWindow>,
 }
 #[derive(Clone, Default, PartialEq, PartialOrd, Debug)]
 pub enum RegFormat {
@@ -183,6 +186,10 @@ impl RegFile {
     ) -> Self {
         let mut arr: [u32; 32] = [0; 32];
         arr[29] = 0x8000_0000;
+
+        #[cfg(feature = "gui-egui")]
+        let reg_view =
+            RegViewWindow::new(id.to_string(), "Register view".into()).set_data_view(None);
         RegFile {
             id: id.to_string(),
             pos,
@@ -195,6 +202,7 @@ impl RegFile {
             history: RefCell::new(vec![]),
             show_reg_names: RefCell::default(),
             reg_format: RefCell::default(),
+            reg_view: RefCell::new(reg_view),
         }
     }
 
