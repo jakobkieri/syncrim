@@ -40,11 +40,10 @@ pub struct RegFile {
     //used for gui
     #[serde(skip)]
     pub show_reg_names: RefCell<bool>,
-
-    #[serde(skip)]
-    pub reg_format: RefCell<RegFormat>,
+    /*#[serde(skip)]
+    pub reg_format: RefCell<RegFormat>,*/
 }
-#[derive(Clone, Default, PartialEq, PartialOrd, Debug)]
+/*#[derive(Clone, Default, PartialEq, PartialOrd, Debug)]
 pub enum RegFormat {
     #[default]
     Hex,
@@ -53,7 +52,7 @@ pub enum RegFormat {
     DecUnsigned,
     UTF8BE,
     UTF8LE,
-}
+}*/
 
 #[derive(Serialize, Deserialize, Clone)]
 struct RegOp {
@@ -198,7 +197,7 @@ impl RegFile {
             registers: RefCell::new(arr), // create 32 zeros, wit 29(stack pointer) at 0x8000_0000
             history: RefCell::new(vec![]),
             show_reg_names: RefCell::default(),
-            reg_format: RefCell::default(),
+            /*reg_format: RefCell::default(),*/
             reg_view: RefCell::new(reg_view),
             phys_mem_id,
         }
