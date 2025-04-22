@@ -1,4 +1,4 @@
-use egui::{RichText, ScrollArea, TextWrapMode, Ui, ViewportBuilder, ViewportId};
+use egui::{ComboBox, RichText, ScrollArea, TextWrapMode, Ui, ViewportBuilder, ViewportId};
 use std::collections::{HashMap, HashSet};
 
 //use crate::components::{MemOpSize, MipsMem};
@@ -16,16 +16,29 @@ pub struct RegViewWindow {
 
     // used for formatting the view
     big_endian: bool,
-    format: DataFormat,
+    //format: DataFormat,
 
     // used to determine if section, symbols and other markers should be shown
     show_settings: ShowSettings,
 
     // used for show register
     register_values: Option<[u32; 32]>,
+    show_reg_names: bool,
+    reg_format: RegFormat,
 }
 
-#[derive(PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)] //, Default, PartialEq, PartialOrd, Debug)]
+enum RegFormat {
+    //#[default]
+    Hex,
+    Bin,
+    DecSigned,
+    DecUnsigned,
+    UTF8BE,
+    UTF8LE,
+}
+
+/*#[derive(PartialEq, Clone, Serialize, Deserialize)]
 enum DataFormat {
     Hex,
     HexAndMips,
@@ -35,6 +48,7 @@ enum DataFormat {
     Byte,
     ByteAndUtf8,
 }
+*/
 
 #[derive(Clone, Serialize, Deserialize)]
 struct ShowSettings {
@@ -60,7 +74,7 @@ impl RegViewWindow {
             row_offset: 0,
             max_rows: 1024,
             big_endian: true, // big endian is default on mips
-            format: DataFormat::Hex,
+            //format: DataFormat::Hex,
             show_settings: ShowSettings {
                 symbols: true,
                 sections: false,
@@ -68,6 +82,8 @@ impl RegViewWindow {
                 registers: [false; 32],
             },
             register_values: None,
+            show_reg_names: true,
+            reg_format: RegFormat::Hex,
         }
     }
 
@@ -134,7 +150,7 @@ impl RegViewWindow {
                 // Render top panel with go to, format and show menus
                 self.render_top(ctx);
 
-                egui::CentralPanel::default().show(ctx, |ui| {
+                /*egui::CentralPanel::default().show(ctx, |ui| {
                     let h = ui.text_style_height(&egui::TextStyle::Body);
                     /*
                     // if self.go_to_address is none this functions does nothing but return the passed scrollArea
@@ -146,7 +162,8 @@ impl RegViewWindow {
                             self.render_scroll_area_item(ui, i);
                         }
                     });*/
-                })
+                })*/
+                self.render_registers(ctx);
             },
         );
     }
@@ -154,103 +171,26 @@ impl RegViewWindow {
     fn render_top(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top(self.id.clone()).show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.menu_button("Go to", |ui| {
-                    ui.separator();
+                // A toggle button for showing register names
+                ui.toggle_value(&mut self.show_reg_names, "Show names");
 
-                    let mut close_menu = false;
-                    ui.menu_button("section", |ui| {
-                        // for (key, v) in sections {
-                        //     if ui.button(format!("{} {:#0x}", v, key)).clicked() {
-                        //         self.go_to_address = set_address(&self.go_type, *key);
-                        //         ui.close_menu();
-                        //         close_menu = true;
-                        //     }
-                        // }
+                // show the display format of the register
+                let mut tmp: RegFormat = self.reg_format.clone();
+                ComboBox::from_id_source(&self.id)
+                    .selected_text(format!("{:?}", tmp))
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut tmp, RegFormat::Hex, "Hex");
+                        ui.selectable_value(&mut tmp, RegFormat::DecUnsigned, "Decimal");
+                        ui.selectable_value(&mut tmp, RegFormat::DecSigned, "Decimal signed");
+                        ui.selectable_value(&mut tmp, RegFormat::Bin, "Binary");
+                        ui.selectable_value(&mut tmp, RegFormat::UTF8BE, "UTF-8 big endian");
+                        ui.selectable_value(&mut tmp, RegFormat::UTF8LE, "UTF-8 little endian");
                     });
-
-                    ui.separator();
-                    ui.menu_button("Format", |ui| {
-                        ui.selectable_value(&mut self.big_endian, false, "Little Endian");
-                        ui.selectable_value(&mut self.big_endian, true, "Big Endian");
-                        ui.separator();
-                        ui.selectable_value(&mut self.format, DataFormat::Hex, "Hex");
-                        ui.selectable_value(&mut self.format, DataFormat::HexAndMips, "Hex + mips");
-                        ui.selectable_value(
-                            &mut self.format,
-                            DataFormat::DecSigned,
-                            "Decimal Singed",
-                        );
-                        ui.selectable_value(
-                            &mut self.format,
-                            DataFormat::DecUnsigned,
-                            "Decimal Unsigned",
-                        );
-                        ui.selectable_value(&mut self.format, DataFormat::Bin, "Binary");
-                        ui.selectable_value(&mut self.format, DataFormat::Byte, "Bytes");
-                        ui.selectable_value(
-                            &mut self.format,
-                            DataFormat::ByteAndUtf8,
-                            "Bytes + UTF8",
-                        );
-                    });
-                    ui.menu_button("Show", |ui| {
-                        ui.checkbox(&mut self.show_settings.symbols, "Symbols");
-                        ui.checkbox(&mut self.show_settings.sections, "Sections");
-                        if self.register_values.is_some() {
-                            ui.separator();
-
-                            ui.checkbox(&mut self.show_settings.registers[28], "Global Pointer");
-                            ui.checkbox(&mut self.show_settings.registers[29], "Stack Pointer");
-                            ui.checkbox(&mut self.show_settings.registers[30], "Frame Pointer");
-                            ui.checkbox(&mut self.show_settings.registers[31], "Return address");
-                            ui.separator();
-                            ui.menu_button("Other register", |ui| {
-                                ScrollArea::vertical().show(ui, |ui| {
-                                    for (i, name) in REG_NAMES.iter().enumerate() {
-                                        ui.checkbox(
-                                            &mut self.show_settings.registers[i],
-                                            format!("${}", name),
-                                        );
-                                    }
-                                });
-                            });
-                        }
-                    });
-                });
+                self.reg_format = tmp;
             });
         });
-        /*
-        /// NOTE borrows mem
-        fn render_scroll_area_item(&mut self, ui: &mut Ui, scroll_area_row: usize) {
-            let more_row_text = RichText::new(format!("show {} more rows", &self.max_rows / 2));
-            if scroll_area_row == 0 {
-                if self.row_offset == 0 {
-                    _ = ui.small_button(more_row_text.clone().strikethrough());
-                } else if ui.small_button(more_row_text).clicked() {
-                    // 4* to get memory address
-                    // -1 because the button takes up a row
-                };
-            } else {
-                // -4 is to allow for space for the show more button
-                let address = scroll_area_row as u32 * 4 + self.row_offset * 4 - 4;
-                if ui
-                    .label(
-                        RichText::new(format!(
-                            "{}{:#010x}\t {:015} {}",
-                            address,
-                            self.format_row(address, mem),
-                            match self.get_symbols_etc_at_address(&address, mem) {
-                                Some(string) => format!("\t<= {}", string),
-                                None => String::new(),
-                            }
-                        ))
-                        .monospace(),
-                    )
-                    .clicked()
-                {};
-            }
-        }
 
+        /*
         // TODO symbol or sect might not be word aligned,
         // since we check word aligned addresses we might miss the symbol/reg ect
         fn get_symbols_etc_at_address(&self, adrs: &u32) -> Option<String> {
@@ -283,6 +223,20 @@ impl RegViewWindow {
             } else {
                 Some(out_vec.join(", "))
             }
+        }*/
+    }
+    // A scroll area with all the registers in one label
+    fn render_registers(&mut self, ctx: &egui::Context) {
+        /*let mut str: String = "".into();
+        for (i, val) in self.register_values.iter().enumerate() {
+            // add reg name or reg number to the formatted string
+            str.push_str(
+                match self.show_reg_names {
+                    true => format!("{:<4}", REG_NAMES[i]),
+                    false => format!("r{:<3}", i),
+                }
+                .as_str(),
+            );
         }*/
     }
 }
