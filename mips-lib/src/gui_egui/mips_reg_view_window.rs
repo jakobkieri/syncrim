@@ -1,4 +1,7 @@
-use egui::{ComboBox, RichText, ScrollArea, TextWrapMode, Ui, ViewportBuilder, ViewportId};
+use egui::{
+    debug_text::print, ComboBox, RichText, ScrollArea, TextWrapMode, Ui, ViewportBuilder,
+    ViewportId,
+};
 use std::collections::{HashMap, HashSet};
 
 //use crate::components::{MemOpSize, MipsMem};
@@ -22,7 +25,7 @@ pub struct RegViewWindow {
     show_settings: ShowSettings,
 
     // used for show register
-    register_values: Option<[u32; 32]>,
+    register_values: [u32; 32],
     show_reg_names: bool,
     reg_format: RegFormat,
 }
@@ -65,6 +68,11 @@ const REG_NAMES: [&str; 32] = [
 ];
 
 impl RegViewWindow {
+    /// set register values, allows to display where they point as well as jump to them
+    pub fn set_reg_values(&mut self, reg_values: [u32; 32]) {
+        self.register_values = reg_values;
+    }
+
     // creates a new memory view window with id string and the given memory
     pub fn new(id: String, title: String) -> Self {
         RegViewWindow {
@@ -81,7 +89,7 @@ impl RegViewWindow {
                 program_counter: false,
                 registers: [false; 32],
             },
-            register_values: None,
+            register_values: [0; 32],
             show_reg_names: true,
             reg_format: RegFormat::Hex,
         }
@@ -150,19 +158,20 @@ impl RegViewWindow {
                 // Render top panel with go to, format and show menus
                 self.render_top(ctx);
 
-                /*egui::CentralPanel::default().show(ctx, |ui| {
+                /*
+                egui::CentralPanel::default().show(ctx, |ui| {
                     let h = ui.text_style_height(&egui::TextStyle::Body);
-                    /*
-                    // if self.go_to_address is none this functions does nothing but return the passed scrollArea
+                    let scr_area = ScrollArea::vertical();
                     //   +2 for the show more buttons
                     scr_area.show_rows(ui, h, (self.max_rows + 2) as usize, |ui, draw_range| {
                         ui.style_mut().wrap_mode = Some(TextWrapMode::Truncate);
                         ui.set_width(ui.available_width());
                         for i in draw_range.clone() {
-                            self.render_scroll_area_item(ui, i);
+                            //self.render_scroll_area_item(ui, i);
                         }
-                    });*/
+                    });
                 })*/
+
                 self.render_registers(ctx);
             },
         );
@@ -225,18 +234,101 @@ impl RegViewWindow {
             }
         }*/
     }
+    /*
+    fn render_scroll_area_item(&mut self, ui: &mut Ui, scroll_area_row: usize) {
+        let more_row_text = RichText::new(format!("show {} more rows", &self.max_rows / 2));
+        if scroll_area_row == 0 {
+            if self.row_offset == 0 {
+                _ = ui.small_button(more_row_text.clone().strikethrough());
+            } else if ui.small_button(more_row_text).clicked() {
+                // 4* to get memory address
+                // -1 because the button takes up a row
+                self.go_to_address = GoAddress::Top((self.row_offset - 1) * 4);
+            };
+        } else if scroll_area_row == self.max_rows as usize + 1 {
+            if ui.small_button(more_row_text).clicked() {
+                self.go_to_address = GoAddress::Bottom((self.row_offset + self.max_rows) * 4);
+            };
+        } else {
+            // -4 is to allow for space for the show more button
+            let address = scroll_area_row as u32 * 4 + self.row_offset * 4 - 4;
+            if ui
+                .label(
+                    RichText::new(format!(
+                        "{}{:#010x}\t {:015} {}",
+                        match self.break_points.contains(&address) {
+                            true => "BREAK ",
+                            false => "",
+                        },
+                        address,
+                        self.format_row(address, mem),
+                        match self.get_symbols_etc_at_address(&address, mem) {
+                            Some(string) => format!("\t<= {}", string),
+                            None => String::new(),
+                        }
+                    ))
+                    .monospace(),
+                )
+                .clicked()
+            {
+                // was the row clicked if so add breakpoint to address
+                match self.break_points.contains(&address) {
+                    true => self.break_points.remove(&address),
+                    false => self.break_points.insert(address),
+                };
+            };
+        }
+    }*/
     // A scroll area with all the registers in one label
     fn render_registers(&mut self, ctx: &egui::Context) {
-        /*let mut str: String = "".into();
-        for (i, val) in self.register_values.iter().enumerate() {
-            // add reg name or reg number to the formatted string
-            str.push_str(
-                match self.show_reg_names {
-                    true => format!("{:<4}", REG_NAMES[i]),
-                    false => format!("r{:<3}", i),
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::both().show(ui, |ui| {
+                ui.style_mut().wrap_mode = Some(TextWrapMode::Truncate);
+                ui.set_width(ui.available_width());
+
+                for (i, val) in self.register_values.iter().enumerate() {
+                    ui.label(
+                        RichText::new(format!(
+                            "{} \t {}",
+                            match self.show_reg_names {
+                                true => format!("{:<4}", REG_NAMES[i]),
+                                false => format!("r{:<3}", i),
+                            }
+                            .as_str(),
+                            match self.reg_format {
+                                RegFormat::Hex => format!("{:#010x}", val),
+                                RegFormat::DecSigned => format!("{}", (*val) as i32),
+                                RegFormat::DecUnsigned => format!("{}", val),
+                                RegFormat::Bin => format!("{:#034b}", val),
+                                RegFormat::UTF8BE => String::from_utf8_lossy(&val.to_be_bytes())
+                                    .escape_debug()
+                                    .to_string(),
+                                RegFormat::UTF8LE => String::from_utf8_lossy(&val.to_le_bytes())
+                                    .escape_debug()
+                                    .to_string(),
+                            }
+                            .as_str(),
+                        ))
+                        .monospace(),
+                    );
+
+                    // add reg name or reg number to the formatted string
+                    /*
+                    print!("\n");
+                    print!("{:?}", val);
+                    print!("\n");
+                    */
+                    /*str.push_str(
+                        match self.show_reg_names {
+                            true => format!("{:<4}", REG_NAMES[i]),
+                            false => format!("r{:<3}", i),
+                        }
+                        .as_str(),
+                    );
+                    ui.label(RichText::new(str).monospace());
+                    */
                 }
-                .as_str(),
-            );
-        }*/
+            });
+        });
     }
 }
