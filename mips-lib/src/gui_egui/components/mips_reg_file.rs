@@ -118,6 +118,7 @@ impl EguiComponent for RegFile {
                 let mut reg_view = self.reg_view.borrow_mut();
                 reg_view.visible = reg_view_vis;
                 reg_view.render(ui.ctx());
+                reg_view.set_reg_values(*self.registers.borrow());
             }
         }
         r
