@@ -283,9 +283,9 @@ impl RegViewWindow {
     fn render_registers(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ScrollArea::both().show(ui, |ui| {
-                ui.style_mut().wrap_mode = Some(TextWrapMode::Truncate);
                 ui.set_width(ui.available_width());
-
+                ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
+                
                 for (i, val) in self.register_values.iter().enumerate() {
                     ui.label(
                         RichText::new(format!(
@@ -311,22 +311,6 @@ impl RegViewWindow {
                         ))
                         .monospace(),
                     );
-
-                    // add reg name or reg number to the formatted string
-                    /*
-                    print!("\n");
-                    print!("{:?}", val);
-                    print!("\n");
-                    */
-                    /*str.push_str(
-                        match self.show_reg_names {
-                            true => format!("{:<4}", REG_NAMES[i]),
-                            false => format!("r{:<3}", i),
-                        }
-                        .as_str(),
-                    );
-                    ui.label(RichText::new(str).monospace());
-                    */
                 }
             });
         });

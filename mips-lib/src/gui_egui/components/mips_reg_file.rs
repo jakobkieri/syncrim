@@ -1,4 +1,4 @@
-use crate::components::{reg_file_fields, PhysicalMem, RegFile};
+use crate::components::{reg_file_fields, PhysicalMem, RegFile, RegFormat};
 use egui::{vec2, ComboBox, Pos2, Rect, Response, RichText, ScrollArea, Ui, Vec2};
 use syncrim::common::{EguiComponent, Input, Ports, Simulator};
 use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
@@ -31,7 +31,7 @@ impl EguiComponent for RegFile {
             ui.set_height(250f32 * scale);
             ui.label("Register File");
 
-            /*// showing the display format of the register
+            // showing the display format of the register
             let mut tmp: RegFormat = self.reg_format.borrow().clone();
             ComboBox::from_id_source(&self.id)
                 .selected_text(format!("{:?}", tmp))
@@ -43,7 +43,7 @@ impl EguiComponent for RegFile {
                     ui.selectable_value(&mut tmp, RegFormat::UTF8BE, "UTF-8 big endian");
                     ui.selectable_value(&mut tmp, RegFormat::UTF8LE, "UTF-8 little endian");
                 });
-            *self.reg_format.borrow_mut() = tmp; */
+            *self.reg_format.borrow_mut() = tmp;
 
             match reg_view_vis {
                 false => {
@@ -58,9 +58,8 @@ impl EguiComponent for RegFile {
 
             ui.separator();
 
-            /*
             // A scroll area with all the registers in one label
-            ScrollArea::vertical().show(ui, |ui| {
+            ScrollArea::both().show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.set_height(ui.available_height());
 
@@ -99,7 +98,7 @@ impl EguiComponent for RegFile {
 
                 // push the string as monospace to the ui
                 ui.label(RichText::new(str).size(12f32 * scale).monospace())
-            });*/
+            });
         });
         if let Some(sim) = &simulator {
             let v = &sim.ordered_components;
