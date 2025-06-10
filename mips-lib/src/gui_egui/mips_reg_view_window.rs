@@ -1,6 +1,6 @@
 use egui::{
     debug_text::print, ComboBox, RichText, ScrollArea, TextWrapMode, Ui, ViewportBuilder,
-    ViewportId,
+    ViewportId,Color32
 };
 use std::collections::{HashMap, HashSet};
 
@@ -28,6 +28,7 @@ pub struct RegViewWindow {
     register_values: [u32; 32],
     show_reg_names: bool,
     reg_format: RegFormat,
+    register_changed: [bool; 32],
 }
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)] //, Default, PartialEq, PartialOrd, Debug)]
@@ -69,8 +70,9 @@ const REG_NAMES: [&str; 32] = [
 
 impl RegViewWindow {
     /// set register values, allows to display where they point as well as jump to them
-    pub fn set_reg_values(&mut self, reg_values: [u32; 32]) {
+    pub fn set_reg_values(&mut self, reg_values: [u32; 32], reg_value_has_changed: [bool; 32]) {
         self.register_values = reg_values;
+        self.register_changed = reg_value_has_changed;
     }
 
     // creates a new memory view window with id string and the given memory
@@ -92,6 +94,7 @@ impl RegViewWindow {
             register_values: [0; 32],
             show_reg_names: true,
             reg_format: RegFormat::Hex,
+            register_changed: [false; 32],
         }
     }
 
@@ -180,7 +183,6 @@ impl RegViewWindow {
     fn render_top(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top(self.id.clone()).show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                // A toggle button for showing register names
                 ui.toggle_value(&mut self.show_reg_names, "Show names");
 
                 // show the display format of the register
@@ -285,6 +287,44 @@ impl RegViewWindow {
             ScrollArea::both().show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
+
+                for (i, val) in self.register_values.iter().enumerate() {
+                    let name = if self.show_reg_names {
+                        format!("{:<4}", REG_NAMES[i])
+                    } else {
+                        format!("r{:<3}", i)
+                    };
+                    let val_str = match self.reg_format {
+                        RegFormat::Hex => format!("{:#010x}", val),
+                        RegFormat::DecSigned => format!("{}", (*val) as i32),
+                        RegFormat::DecUnsigned => format!("{}", val),
+                        RegFormat::Bin => format!("{:#034b}", val),
+                        RegFormat::UTF8BE => String::from_utf8_lossy(&val.to_be_bytes())
+                            .escape_debug()
+                            .to_string(),
+                        RegFormat::UTF8LE => String::from_utf8_lossy(&val.to_le_bytes())
+                            .escape_debug()
+                            .to_string(),
+                    };
+                    let text = format!("{} \t {}", name, val_str);
+
+                    let color:Color32;
+                    if self.register_changed[i] {
+                        color = Color32::RED;
+                    } else {
+                        color = Color32::GRAY;
+                    }
+
+                    // Draw the label with monospace font and the chosen color
+                    ui.label(RichText::new(text).monospace().color(color));
+                }
+            });
+        });
+
+        /*egui::CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::both().show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
                 
                 for (i, val) in self.register_values.iter().enumerate() {
                     ui.label(
@@ -313,6 +353,6 @@ impl RegViewWindow {
                     );
                 }
             });
-        });
+        });*/
     }
 }

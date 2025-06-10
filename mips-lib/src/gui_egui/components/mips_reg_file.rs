@@ -117,7 +117,25 @@ impl EguiComponent for RegFile {
                 let mut reg_view = self.reg_view.borrow_mut();
                 reg_view.visible = reg_view_vis;
                 reg_view.render(ui.ctx());
-                reg_view.set_reg_values(*self.registers.borrow());
+
+                // Check which registers have been modified. 
+                // reg_view_window is notified about those registers.
+                let reg_values = *self.registers.borrow();
+                let previous_reg_values = *self.previous_registers.borrow();
+                let mut reg_value_has_changed: [bool; 32] = [false; 32];
+                for i in 0..reg_values.len() {
+                    if reg_values[i] != previous_reg_values[i] {
+                        reg_value_has_changed[i] = true;
+                        println!("i = {:?}", i);
+                    }
+                }
+                if reg_value_has_changed.contains(&true) {
+                    reg_view.set_reg_values(reg_values, reg_value_has_changed);
+                    *self.previous_registers.borrow_mut() = reg_values;
+                    println!("{:?}",self.previous_registers.borrow());
+                }
+                
+
             }
         }
         r

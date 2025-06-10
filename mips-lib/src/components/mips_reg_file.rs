@@ -35,6 +35,8 @@ pub struct RegFile {
     #[serde(skip)]
     pub registers: RefCell<[u32; 32]>, // all 32 registers, in future, we might save the whole signal
     #[serde(skip)]
+    pub previous_registers: RefCell<[u32; 32]>,
+    #[serde(skip)]
     history: RefCell<Vec<RegOp>>, // contains the value before it was modified used for unclock.
 
     //used for gui
@@ -164,6 +166,7 @@ impl Component for RegFile {
         *self.registers.borrow_mut() = [0; 32];
         self.registers.borrow_mut()[29] = 0x8000_0000;
         *self.history.borrow_mut() = vec![];
+        *self.previous_registers.borrow_mut() = [0;32];
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -200,6 +203,7 @@ impl RegFile {
             reg_format: RefCell::default(),
             reg_view: RefCell::new(reg_view),
             phys_mem_id,
+            previous_registers: RefCell::new([0;32]),
         }
     }
 
