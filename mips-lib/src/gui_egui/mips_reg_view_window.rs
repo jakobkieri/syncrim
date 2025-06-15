@@ -16,9 +16,6 @@ pub struct RegViewWindow {
     big_endian: bool,
     reg_format: RegFormat,
 
-    // used to determine if section, symbols and other markers should be shown
-    show_settings: ShowSettings,
-
     // used for show register
     register_values: [u32; 32],
     show_reg_names: bool,
@@ -33,14 +30,6 @@ enum RegFormat {
     DecUnsigned,
     UTF8BE,
     UTF8LE,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-struct ShowSettings {
-    symbols: bool,
-    sections: bool,
-    program_counter: bool,
-    registers: [bool; 32],
 }
 
 const REG_NAMES: [&str; 32] = [
@@ -65,12 +54,6 @@ impl RegViewWindow {
             row_offset: 0,
             max_rows: 1024,
             big_endian: true, // big endian is default on mips
-            show_settings: ShowSettings {
-                symbols: true,
-                sections: false,
-                program_counter: false,
-                registers: [false; 32],
-            },
             register_values: [0; 32],
             show_reg_names: true,
             reg_format: RegFormat::Hex,
