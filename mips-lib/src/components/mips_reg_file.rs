@@ -33,7 +33,7 @@ pub struct RegFile {
     pub phys_mem_id: String,
 
     #[serde(skip)]
-    pub registers: RefCell<[u32; 32]>, // all 32 registers, in future, we might save the whole signal
+    pub registers: RefCell<[u32; 32]>, // all 32 registers, in the future, we might save the whole signal
     #[serde(skip)]
     pub previous_registers: RefCell<[u32; 32]>,
     #[serde(skip)]
@@ -188,9 +188,9 @@ impl RegFile {
         let mut arr: [u32; 32] = [0; 32];
         arr[29] = 0x8000_0000;
         #[cfg(feature = "gui-egui")]
-        let reg_view = RegViewWindow::new(id.clone(), "REGFILE view".into()); //.set_data_view(None);
+        let reg_view = RegViewWindow::new(id.clone(), "register file view".into()); //.set_data_view(None);
         RegFile {
-            id: id,
+            id,
             pos,
             rs_address_in,
             rt_address_in,

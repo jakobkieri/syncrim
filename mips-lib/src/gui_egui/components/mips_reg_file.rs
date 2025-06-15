@@ -1,4 +1,4 @@
-use crate::components::{reg_file_fields, PhysicalMem, RegFile, RegFormat};
+use crate::components::{reg_file_fields, RegFile, RegFormat};
 use egui::{vec2, ComboBox, Pos2, Rect, Response, RichText, ScrollArea, Ui, Vec2};
 use syncrim::common::{EguiComponent, Input, Ports, Simulator};
 use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
@@ -47,12 +47,12 @@ impl EguiComponent for RegFile {
 
             match reg_view_vis {
                 false => {
-                    if ui.button("Show regfile window").clicked() {
+                    if ui.button("Show register file window").clicked() {
                         reg_view_vis = true;
                     }
                 }
                 true => {
-                    ui.toggle_value(&mut reg_view_vis, "Hide REGFILE window");
+                    ui.toggle_value(&mut reg_view_vis, "Hide register file window");
                 }
             };
 
@@ -101,17 +101,6 @@ impl EguiComponent for RegFile {
             });
         });
         if let Some(sim) = &simulator {
-            let v = &sim.ordered_components;
-            #[allow(clippy::expect_fun_call)]
-            let comp = v
-                .iter()
-                .find(|x| x.get_id_ports().0 == self.phys_mem_id)
-                .expect(&format!("cant find {} in simulator", self.phys_mem_id));
-            // deref to get &dyn EguiComponent
-            let comp_any = (*comp).as_any();
-            let phys_mem: &PhysicalMem = comp_any
-                .downcast_ref()
-                .expect("can't downcast to physical memory");
             // {} to drop RefMut as early as possible
             {
                 let mut reg_view = self.reg_view.borrow_mut();
@@ -142,12 +131,12 @@ impl EguiComponent for RegFile {
     }
     fn render_editor(
         &mut self,
-        ui: &mut egui::Ui,
+        ui: &mut Ui,
         context: &mut EguiExtra,
         simulator: Option<&mut Simulator>,
-        offset: egui::Vec2,
+        offset: Vec2,
         scale: f32,
-        clip_rect: egui::Rect,
+        clip_rect: Rect,
         _id_ports: &[(Id, Ports)],
         _grid: &GridOptions,
         editor_mode: EditorMode,
