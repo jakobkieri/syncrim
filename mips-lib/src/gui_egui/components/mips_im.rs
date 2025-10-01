@@ -105,7 +105,7 @@ impl EguiComponent for InstrMem {
             // });
         });
 
-        // handle mem_window and load of new file
+        // update dynamic symbols, load new file and handle mem_window
         if let Some(sim) = &simulator {
             self.update_mem_view_register_values(sim);
             self.mem_view

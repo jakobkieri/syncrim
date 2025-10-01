@@ -25,6 +25,20 @@ impl EguiComponent for RegFile {
         _editor_mode: EditorMode,
     ) -> Option<Vec<Response>> {
         let mut reg_view_vis: bool = self.reg_view.borrow().visible;
+        let mut changed_register: [u32; 1] = [u32::MAX];
+        if let Some(sim) = &simulator {
+            let w_addr: usize = sim
+                .get_input_value(&self.write_address_in)
+                .try_into()
+                .unwrap();
+            let w_enable: u32 = sim
+                .get_input_value(&self.write_enable_in)
+                .try_into()
+                .unwrap();
+            if w_enable == 1 && w_addr != 0 {
+                changed_register[0] = w_addr as u32;
+            }
+        }
 
         let r = basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
             ui.set_width(120f32 * scale);
@@ -87,7 +101,8 @@ impl EguiComponent for RegFile {
 
                     // Colour the register that was last changed
                     let color: Color32;
-                    if *(self.changed_register.borrow()) == i as u32 {
+
+                    if (changed_register[0] as usize) == i {
                         color = Color32::RED;
                     } else {
                         color = Color32::GRAY;
@@ -110,7 +125,7 @@ impl EguiComponent for RegFile {
             reg_view.render(ui.ctx());
 
             // Update the register view with the current register values
-            reg_view.set_reg_values(*self.registers.borrow(), *self.changed_register.borrow());
+            reg_view.set_reg_values(*self.registers.borrow(), changed_register[0] as u32);
         }
         r
     }
