@@ -232,8 +232,12 @@ impl EguiComponent for Wire {
                     delete = true;
                 }
                 let delta = resp.drag_delta() / scale;
-                self.pos[i] = (self.pos[i].0 + delta.x, self.pos[i].1 + delta.y);
-                self.pos[i + 1] = (self.pos[i + 1].0 + delta.x, self.pos[i + 1].1 + delta.y);
+                if i != 0 {
+                    self.pos[i] = (self.pos[i].0 + delta.x, self.pos[i].1 + delta.y);
+                }
+                if (i + 1) != (self.pos.len() - 1) {
+                    self.pos[i + 1] = (self.pos[i + 1].0 + delta.x, self.pos[i + 1].1 + delta.y);
+                }
             }
             if resp.drag_stopped_by(PointerButton::Primary)
                 && resp.interact_pointer_pos().unwrap().x < offset.x
@@ -277,20 +281,23 @@ impl EguiComponent for Wire {
 
                     let mut i = 0;
                     let mut to_insert: Option<(usize, (f32, f32))> = None;
-                    let mut first_item = true;
+                    // we don't want to be able to delete neither first nor last segment
+                    let (first_index, last_index) = (0, self.pos.len() - 1);
                     self.pos.retain_mut(|seg_pos| {
                         let mut delete = false;
                         ui.horizontal(|ui| {
                             ui.label(format!("Segment {}:", i));
-                            ui.label("pos x");
-                            ui.add(DragValue::new(&mut seg_pos.0).speed(0.5));
-                            ui.label("pos y");
-                            ui.add(DragValue::new(&mut seg_pos.1).speed(0.5));
-
-                            if first_item {
-                                first_item = false;
-                            } else if ui.button("🗙").clicked() {
-                                delete = true;
+                            if i == first_index || i == last_index {
+                                ui.label(format!("pos x {:?}", seg_pos.0));
+                                ui.label(format!("pox y {:?}", seg_pos.1));
+                            } else {
+                                ui.label("pos x");
+                                ui.add(DragValue::new(&mut seg_pos.0).speed(0.5));
+                                ui.label("pos y");
+                                ui.add(DragValue::new(&mut seg_pos.1).speed(0.5));
+                                if ui.button("🗙").clicked() {
+                                    delete = true;
+                                }
                             }
                             if ui.button("NEW").clicked() {
                                 to_insert = Some((i, *seg_pos));
