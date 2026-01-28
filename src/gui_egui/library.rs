@@ -54,20 +54,26 @@ pub fn input_mode(ctx: &Context, e: &mut Editor, cpr: Response) {
     } else {
         Vec2::new(e.im.cursor_location.x, e.im.cursor_location.y)
     };
-    e.im.comp.as_ref().unwrap().render(
-        &mut ui,
-        &mut EguiExtra {
-            properties_window: false,
-            size_rect: Rect::NAN,
-            id_tmp: String::new(),
-            pos_tmp: Pos2::ZERO,
-        },
-        None,
-        pos,
-        e.scale,
-        clip_rect,
-        e.editor_mode,
-    );
+    match e.im.comp.as_ref() {
+        Some(r) => r.render(
+            &mut ui,
+            &mut EguiExtra {
+                properties_window: false,
+                size_rect: Rect::NAN,
+                id_tmp: String::new(),
+                pos_tmp: Pos2::ZERO,
+            },
+            None,
+            pos,
+            e.scale,
+            clip_rect,
+            e.editor_mode,
+        ),
+        None => {
+            println!("Aborted opening of new .json, after saving the current model!!!");
+            todo!()
+        }
+    };
 
     if cpr.drag_started_by(PointerButton::Primary) {
         add_comp_to_editor(e);

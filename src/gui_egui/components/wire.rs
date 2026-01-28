@@ -206,6 +206,9 @@ impl EguiComponent for Wire {
         let mut properties_window_open = false;
         for (i, resp) in r_vec.iter().enumerate() {
             if resp.dragged_by(PointerButton::Primary) {
+                println!(
+                    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                );
                 if ui.ctx().input_mut(|i| {
                     i.consume_shortcut(&KeyboardShortcut {
                         modifiers: Modifiers {

@@ -43,7 +43,19 @@ pub struct EguiExtra {
 
 pub fn gui(cs: ComponentStore, path: &PathBuf, library: Library) -> Result<(), eframe::Error> {
     let contexts = create_contexts(&cs.store);
-    let simulator = Simulator::new(cs).unwrap();
+    let simulator;
+    match Simulator::new(cs) {
+        Ok(s) => simulator = s,
+        Err(e) => {
+            return Err(eframe::Error::AppCreation(
+                format!(
+                "BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO: {}",
+                e
+            )
+                .into(),
+            ))
+        }
+    };
     let options = eframe::NativeOptions::default();
     let path = path.to_owned();
     simulator.save_dot(&path);
