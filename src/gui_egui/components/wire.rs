@@ -284,10 +284,8 @@ impl EguiComponent for Wire {
                         let mut delete = false;
                         ui.horizontal(|ui| {
                             ui.label(format!("Segment {}:", i));
-                            ui.label("pos x");
-                            ui.add(DragValue::new(&mut seg_pos.0).speed(0.5));
-                            ui.label("pos y");
-                            ui.add(DragValue::new(&mut seg_pos.1).speed(0.5));
+                            ui.add(DragValue::new(&mut seg_pos.0).speed(0.5).prefix("pos x: "));
+                            ui.add(DragValue::new(&mut seg_pos.1).speed(0.5).prefix("pos y: "));
 
                             if first_item {
                                 first_item = false;
