@@ -1,5 +1,5 @@
 use crate::gui_egui::{
-    editor::{Editor, GridOptions},
+    editor::{Editor, GridOptions, Options, WireOptions},
     gui::Gui,
     keymap,
 };
@@ -83,13 +83,15 @@ impl Menu {
             shared_buttons_file(gui, ui);
             shared_buttons_edit(gui, ui);
             let mut scale = editor(gui).scale;
-            let mut grid_enable = editor(gui).grid.enable;
-            let mut grid_size = editor(gui).grid.size;
-            let mut grid_opacity = editor(gui).grid.opacity;
-            let mut grid_snap_enable = editor(gui).grid.snap_enable;
-            let mut grid_snap_distance = editor(gui).grid.snap_distance;
+            let mut grid_enable = editor(gui).options.grid.enable;
+            let mut grid_size = editor(gui).options.grid.size;
+            let mut grid_opacity = editor(gui).options.grid.opacity;
+            let mut grid_snap_enable = editor(gui).options.grid.snap_enable;
+            let mut grid_snap_distance = editor(gui).options.grid.snap_distance;
+            let mut wire_drag_enable = editor(gui).options.wire.drag_enable;
             let view_grid_toggle = gui.shortcuts.view_grid_toggle;
             let view_grid_snap_toggle = gui.shortcuts.view_grid_snap_toggle;
+            let view_wire_drag_toggle = gui.shortcuts.view_wire_drag_toggle;
             shared_buttons_view(gui, ui, &mut scale, |ui| {
                 ui.horizontal(|ui| {
                     ui.checkbox(&mut grid_enable, "Grid Enable");
@@ -115,14 +117,23 @@ impl Menu {
                     ui.label("Grid Snap Distance:");
                     ui.add(DragValue::new(&mut grid_snap_distance).range(0f32..=100f32));
                 });
+                ui.horizontal(|ui| {
+                    ui.checkbox(&mut wire_drag_enable, "Wire Dragging Enable");
+                    ui.label(ui.ctx().format_shortcut(&view_wire_drag_toggle));
+                });
             });
             editor(gui).scale = scale;
-            editor(gui).grid = GridOptions {
-                enable: grid_enable,
-                size: grid_size,
-                opacity: grid_opacity,
-                snap_enable: grid_snap_enable,
-                snap_distance: grid_snap_distance,
+            editor(gui).options = Options {
+                grid: GridOptions {
+                    enable: grid_enable,
+                    size: grid_size,
+                    opacity: grid_opacity,
+                    snap_enable: grid_snap_enable,
+                    snap_distance: grid_snap_distance,
+                },
+                wire: WireOptions {
+                    drag_enable: wire_drag_enable,
+                },
             };
             shared_buttons_help(gui, ui);
         });

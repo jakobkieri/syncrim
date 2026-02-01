@@ -9,7 +9,7 @@ use syncrim::gui_egui::component_ui::{
     drag_logic, input_change_id, input_selector, pos_drag_value, properties_window,
     rect_with_hover, visualize_ports,
 };
-use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
+use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, Options};
 use syncrim::gui_egui::gui::EguiExtra;
 use syncrim::gui_egui::helper::offset_helper;
 impl RVMem {
@@ -145,7 +145,7 @@ impl EguiComponent for RVMem {
         scale: f32,
         clip_rect: Rect,
         id_ports: &[(syncrim::common::Id, Ports)],
-        grid: &GridOptions,
+        options: &Options,
         editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         let r_vec = RVMem::render(
@@ -168,7 +168,7 @@ impl EguiComponent for RVMem {
             &mut context.pos_tmp,
             scale,
             offset,
-            grid,
+            options,
         );
 
         properties_window(
