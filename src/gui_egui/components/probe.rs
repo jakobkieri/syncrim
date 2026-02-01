@@ -4,7 +4,7 @@ use crate::gui_egui::component_ui::{
     drag_logic, input_change_id, input_selector, pos_drag_value, properties_window,
     rect_with_hover, visualize_ports,
 };
-use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
+use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, Options};
 use crate::gui_egui::gui::EguiExtra;
 use egui::{Align2, Area, Color32, Order, Pos2, Rect, Response, RichText, TextWrapMode, Ui, Vec2};
 
@@ -86,7 +86,7 @@ impl EguiComponent for Probe {
         scale: f32,
         clip_rect: Rect,
         id_ports: &[(crate::common::Id, Ports)],
-        grid: &GridOptions,
+        options: &Options,
         editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         let r_vec = Probe::render(
@@ -108,7 +108,7 @@ impl EguiComponent for Probe {
             &mut context.pos_tmp,
             scale,
             offset,
-            grid,
+            options,
         );
 
         properties_window(

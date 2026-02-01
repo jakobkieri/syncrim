@@ -25,6 +25,7 @@ pub struct Shortcuts {
     pub view_zoom_out: KeyboardShortcut,
     pub view_grid_toggle: KeyboardShortcut,
     pub view_grid_snap_toggle: KeyboardShortcut,
+    pub view_wire_drag_toggle: KeyboardShortcut,
     pub control_play_toggle: KeyboardShortcut,
     pub control_play: KeyboardShortcut,
     pub control_pause: KeyboardShortcut,
@@ -134,6 +135,16 @@ impl Shortcuts {
                 },
                 logical_key: Key::G,
             },
+            view_wire_drag_toggle: KeyboardShortcut {
+                modifiers: Modifiers {
+                    alt: false,
+                    ctrl: true,
+                    shift: true,
+                    mac_cmd: false,
+                    command: false,
+                },
+                logical_key: Key::W,
+            },
             control_play: KeyboardShortcut {
                 modifiers: none,
                 logical_key: Key::F6,
@@ -217,6 +228,9 @@ impl Shortcuts {
         }
         if ctx.input_mut(|i| i.consume_shortcut(&self.view_grid_snap_toggle)) {
             view_grid_snap_toggle_fn(gui);
+        }
+        if ctx.input_mut(|i| i.consume_shortcut(&self.view_wire_drag_toggle)) {
+            view_wire_drag_toggle_fn(gui);
         }
         if ctx.input_mut(|i| i.consume_shortcut(&self.control_play_toggle)) {
             control_play_toggle_fn(gui);
@@ -371,13 +385,19 @@ pub fn view_zoom_out_fn(gui: &mut Gui) {
 pub fn view_grid_toggle_fn(gui: &mut Gui) {
     if gui.editor_use {
         let editor = gui.editor.as_mut().unwrap();
-        editor.grid.enable = !editor.grid.enable;
+        editor.options.grid.enable = !editor.options.grid.enable;
     }
 }
 pub fn view_grid_snap_toggle_fn(gui: &mut Gui) {
     if gui.editor_use {
         let editor = gui.editor.as_mut().unwrap();
-        editor.grid.snap_enable = !editor.grid.snap_enable;
+        editor.options.grid.snap_enable = !editor.options.grid.snap_enable;
+    }
+}
+pub fn view_wire_drag_toggle_fn(gui: &mut Gui) {
+    if gui.editor_use {
+        let editor = gui.editor.as_mut().unwrap();
+        editor.options.wire.drag_enable = !editor.options.wire.drag_enable;
     }
 }
 pub fn control_play_toggle_fn(gui: &mut Gui) {

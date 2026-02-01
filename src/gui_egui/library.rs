@@ -42,11 +42,11 @@ pub fn input_mode(ctx: &Context, e: &mut Editor, cpr: Response) {
                           // Rect::EVERYTHING,
                           // UiStackInfo::new(egui::UiKind::Frame),
     );
-    let pos = if e.grid.enable && e.grid.snap_enable {
+    let pos = if e.options.grid.enable && e.options.grid.snap_enable {
         match get_grid_snap(
-            e.grid.snap_distance,
+            e.options.grid.snap_distance,
             offset_reverse_helper_pos2(e.im.cursor_location, e.scale, e.offset_and_pan),
-            e.grid.size,
+            e.options.grid.size,
         ) {
             Some(s) => Vec2::new(s.x, s.y) * e.scale + e.offset + e.pan * e.scale,
             None => Vec2::new(e.im.cursor_location.x, e.im.cursor_location.y),
@@ -134,8 +134,8 @@ pub fn show_library(e: &mut Editor, ui: &mut Ui) {
 // todo: This should really just copy the component that's in e.input_comp
 pub fn add_comp_to_editor(e: &mut Editor) {
     let mut pos = offset_reverse_helper_pos2(e.im.cursor_location, e.scale, e.offset_and_pan);
-    if e.grid.enable && e.grid.snap_enable {
-        if let Some(p) = get_grid_snap(e.grid.snap_distance, pos, e.grid.size) {
+    if e.options.grid.enable && e.options.grid.snap_enable {
+        if let Some(p) = get_grid_snap(e.options.grid.snap_distance, pos, e.options.grid.size) {
             pos = p;
         }
     }
