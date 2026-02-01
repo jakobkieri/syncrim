@@ -1,5 +1,5 @@
 use crate::common::{Input, Ports};
-use crate::gui_egui::editor::{EditorMode, GridOptions};
+use crate::gui_egui::editor::{EditorMode, Options};
 use crate::gui_egui::editor_wire_mode::get_grid_snap;
 use crate::gui_egui::helper::{
     editor_mode_to_sense, offset_helper, out_of_bounds, unique_component_name,
@@ -208,7 +208,7 @@ pub fn drag_logic(
     tmp_pos: &mut Pos2,
     scale: f32,
     offset: Vec2,
-    grid: &GridOptions,
+    options: &Options,
 ) -> bool {
     let mut delete = false;
     if resp.dragged_by(PointerButton::Primary) {
@@ -235,8 +235,8 @@ pub fn drag_logic(
         }
         let delta = resp.drag_delta() / scale;
         *tmp_pos += delta;
-        if grid.enable && grid.snap_enable {
-            match get_grid_snap(grid.snap_distance, *tmp_pos, grid.size) {
+        if options.grid.enable && options.grid.snap_enable {
+            match get_grid_snap(options.grid.snap_distance, *tmp_pos, options.grid.size) {
                 Some(p) => *pos = (p.x, p.y),
                 None => *pos = (pos.0 + delta.x, pos.1 + delta.y),
             }

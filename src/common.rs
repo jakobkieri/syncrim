@@ -7,7 +7,7 @@ use std::{
 };
 
 #[cfg(feature = "gui-egui")]
-use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions, SnapPriority};
+use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, Options, SnapPriority};
 
 #[cfg(feature = "gui-vizia")]
 use vizia::prelude::*;
@@ -161,7 +161,7 @@ pub trait EguiComponent: Component {
         _scale: f32,
         _clip_rect: egui::Rect,
         _id_ports: &[(Id, Ports)],
-        _grid: &GridOptions,
+        _options: &Options,
         _editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         EditorRenderReturn {

@@ -1,7 +1,7 @@
 use crate::components::{cntr_field, ControlUnit};
 use egui::{pos2, Pos2, Rect, Response, Ui, Vec2};
 use syncrim::common::{EguiComponent, Id, Input, Ports, Simulator};
-use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
+use syncrim::gui_egui::editor::{EditorMode, EditorRenderReturn, Options};
 use syncrim::gui_egui::gui::EguiExtra;
 use syncrim::gui_egui::helper::{basic_component_gui, basic_editor_popup};
 
@@ -41,7 +41,7 @@ impl EguiComponent for ControlUnit {
         scale: f32,
         clip_rect: egui::Rect,
         id_ports: &[(Id, Ports)],
-        _grid: &GridOptions,
+        _options: &Options,
         editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         let res = self
