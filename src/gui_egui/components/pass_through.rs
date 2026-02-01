@@ -1,6 +1,6 @@
 use crate::common::{EguiComponent, Ports, Simulator};
 use crate::components::PassThrough;
-use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
+use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, Options};
 use crate::gui_egui::gui::EguiExtra;
 use crate::gui_egui::helper::basic_component_gui;
 use egui::{Pos2, Rect, Response, Ui, Vec2};
@@ -30,7 +30,7 @@ impl EguiComponent for PassThrough {
         scale: f32,
         clip_rect: Rect,
         _id_ports: &[(crate::common::Id, Ports)],
-        _grid: &GridOptions,
+        _options: &Options,
         _editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         basic_component_gui(self, &simulator, ui.ctx(), offset, scale, clip_rect, |ui| {
