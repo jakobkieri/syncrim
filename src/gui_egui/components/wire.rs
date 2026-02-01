@@ -1,7 +1,7 @@
 use crate::common::{EguiComponent, Ports, Simulator};
 use crate::components::Wire;
 use crate::gui_egui::component_ui::{input_change_id, input_selector, visualize_ports};
-use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions, SnapPriority};
+use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, Options, SnapPriority};
 use crate::gui_egui::gui::EguiExtra;
 use crate::gui_egui::helper::{basic_on_hover, offset_helper, shadow_small_dark};
 use egui::{
@@ -187,7 +187,7 @@ impl EguiComponent for Wire {
         scale: f32,
         clip_rect: Rect,
         id_ports: &[(crate::common::Id, Ports)],
-        _grid: &GridOptions,
+        options: &Options,
         editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         let mut delete = false;
@@ -231,9 +231,11 @@ impl EguiComponent for Wire {
                 }) {
                     delete = true;
                 }
-                let delta = resp.drag_delta() / scale;
-                self.pos[i] = (self.pos[i].0 + delta.x, self.pos[i].1 + delta.y);
-                self.pos[i + 1] = (self.pos[i + 1].0 + delta.x, self.pos[i + 1].1 + delta.y);
+                if options.wire.drag_enable {
+                    let delta = resp.drag_delta() / scale;
+                    self.pos[i] = (self.pos[i].0 + delta.x, self.pos[i].1 + delta.y);
+                    self.pos[i + 1] = (self.pos[i + 1].0 + delta.x, self.pos[i + 1].1 + delta.y);
+                }
             }
             if resp.drag_stopped_by(PointerButton::Primary)
                 && resp.interact_pointer_pos().unwrap().x < offset.x

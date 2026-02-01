@@ -1,6 +1,6 @@
 use crate::common::{EguiComponent, Id, Ports, SignalValue, Simulator};
 use crate::components::SignZeroExtend;
-use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, GridOptions};
+use crate::gui_egui::editor::{EditorMode, EditorRenderReturn, Options};
 use crate::gui_egui::gui::EguiExtra;
 use crate::gui_egui::helper::basic_component_gui;
 use egui::{Rect, Response, RichText, Ui, Vec2};
@@ -51,7 +51,7 @@ impl EguiComponent for SignZeroExtend {
         scale: f32,
         clip_rect: egui::Rect,
         _id_ports: &[(Id, Ports)],
-        _grid: &GridOptions,
+        _options: &Options,
         editor_mode: EditorMode,
     ) -> EditorRenderReturn {
         self.render(
