@@ -1,6 +1,6 @@
 use crate::{
     common::{ComponentStore, RunningState, Simulator},
-    gui_vizia::{grid::Grid, keymap::init_keymap, menu::Menu, transport::Transport},
+    gui_vizia::{grid::options, keymap::init_keymap, menu::Menu, transport::Transport},
 };
 use rfd::FileDialog;
 use std::collections::HashSet;
