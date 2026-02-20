@@ -96,59 +96,49 @@ impl EguiComponent for Wire {
             let last_pos = val[1];
             let rect = Rect::from_two_pos(first_pos, last_pos).expand(2.5);
 
-            #[allow(clippy::single_match)]
-            match editor_mode {
-                EditorMode::Default => {
-                    // why the fuck do i need this much code just to make sure its rendered at the correct layer (Middle)
-                    // instead of background, that current ui is at
-                    let resp = {
-                        Area::new(format!("{}{:#?}", self.id, rect).into())
-                            .order(Order::Middle)
-                            .sense(Sense::all())
-                            .current_pos(rect.center())
-                            .movable(false)
-                            .enabled(true)
-                            .pivot(Align2::CENTER_CENTER)
-                            .constrain(false)
-                            .show(ui.ctx(), |ui: &mut Ui| {
-                                ui.set_min_size(rect.size());
-                            })
+            let resp = {
+                Area::new(format!("{}{:#?}", self.id, rect).into())
+                    .order(Order::Middle)
+                    .sense(Sense::all())
+                    .current_pos(rect.center())
+                    .movable(false)
+                    .enabled(true)
+                    .pivot(Align2::CENTER_CENTER)
+                    .constrain(false)
+                    .show(ui.ctx(), |ui: &mut Ui| {
+                        ui.set_min_size(rect.size());
+                    })
+            }
+            .response;
+            if resp.hovered() {
+                hovered = true;
+                #[allow(clippy::single_match)]
+                match editor_mode {
+                    EditorMode::Default => {
+                        // log::debug!("{:?}", resp);
+                        if resp.contains_pointer() {
+                            ui.painter().rect_stroke(
+                                resp.interact_rect,
+                                CornerRadius::same(0),
+                                Stroke {
+                                    width: scale,
+                                    color: Color32::RED,
+                                },
+                                StrokeKind::Inside,
+                            );
+                        }
+                        r.push(resp);
                     }
-                    .response;
-
-                    // log::debug!("{:?}", resp);
-                    if resp.contains_pointer() {
-                        ui.painter().rect_stroke(
-                            resp.interact_rect,
-                            CornerRadius::same(0),
-                            Stroke {
-                                width: scale,
-                                color: Color32::RED,
-                            },
-                            StrokeKind::Inside,
-                        );
-                    }
-                    r.push(resp);
-                }
-                _ => {}
-            };
-
-            if let Some(cursor) = ui.ctx().pointer_latest_pos() {
-                if min_from_line(first_pos.to_vec2(), last_pos.to_vec2(), cursor.to_vec2())
-                    < TOOLTIP_DISTANCE
-                    && clip_rect.contains(cursor)
-                    && !hovered
-                {
-                    hovered = true;
-                    egui::containers::popup::show_tooltip_at(
-                        ui.ctx(),
-                        ui.layer_id(),
-                        egui::Id::new(&self.id),
-                        (first_pos + last_pos.to_vec2()) / 2.0,
-                        |ui| basic_on_hover(ui, self, &simulator),
-                    );
-                }
-            };
+                    _ => {}
+                };
+                egui::containers::popup::show_tooltip_at(
+                    ui.ctx(),
+                    ui.layer_id(),
+                    egui::Id::new(&self.id),
+                    (first_pos + last_pos.to_vec2()) / 2.0,
+                    |ui| basic_on_hover(ui, self, &simulator),
+                );
+            }
         }
 
         let sk = Stroke {
